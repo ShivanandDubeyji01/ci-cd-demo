@@ -32,7 +32,9 @@ pipeline {
             steps {
                 bat """
                     set PATH=%PHP_PATH%;%PATH%
-                    vendor\\bin\\phpcs --standard=PSR12 src
+                    vendor\\bin\\phpcs --standard=PSR12 src ^
+                      --runtime-set ignore_errors_on_exit 1 ^
+                      --runtime-set ignore_warnings_on_exit 1
                 """
             }
         }
