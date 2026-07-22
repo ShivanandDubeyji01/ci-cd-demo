@@ -36,6 +36,9 @@ pipeline {
     }
 
     post {
+        always {
+            archiveArtifacts artifacts: 'grype-report.json', fingerprint: true
+        }
         success {
             echo 'Build Successful!'
         }
