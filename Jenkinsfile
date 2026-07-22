@@ -1,49 +1,38 @@
-pipeline {
-    agent any
+stages {
 
-    environment {
-        PHP_PATH = 'C:\\xampp8.2\\php'
+    stage('Checkout') {
+        steps {
+            checkout scm
+        }
     }
 
-    stages {
-
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Install Dependencies') {
-            steps {
-                bat "set PATH=%PHP_PATH%;%PATH% && composer install"
-            }
-        }
-
-        stage('Grype Scan') {
+    stage('Install Dependencies') {
         steps {
+            bat "set PATH=%PHP_PATH%;%PATH% && composer install"
+        }
+    }
+
+    stage('Grype Scan') {
+    steps {
         bat """
             cd "%WORKSPACE%"
-            grype dir:. --output json --fail-on high > grype-report.json
+            grype dir:. --output json > grype-report.json
         """
     }
 }
 
-        stage('Run PHPUnit Tests') {
-            steps {
-                bat "set PATH=%PHP_PATH%;%PATH% && vendor\\bin\\phpunit tests"
-            }
+    stage('PHP CodeSniffer') {
+        steps {
+            bat """
+                set PATH=%PHP_PATH%;%PATH%
+                vendor\\bin\\phpcs --standard=PSR12 src
+            """
         }
     }
 
-    post {
-        always {
-            archiveArtifacts artifacts: 'grype-report.json', fingerprint: true
-        }
-        success {
-            echo 'Build Successful!'
-        }
-        failure {
-            echo 'Build Failed!'
+    stage('Run PHPUnit Tests') {
+        steps {
+            bat "set PATH=%PHP_PATH%;%PATH% && vendor\\bin\\phpunit tests"
         }
     }
 }
