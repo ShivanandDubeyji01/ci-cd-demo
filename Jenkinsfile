@@ -34,7 +34,8 @@ pipeline {
                     set PATH=%PHP_PATH%;%PATH%
                     vendor\\bin\\phpcs --standard=PSR12 src ^
                       --runtime-set ignore_errors_on_exit 1 ^
-                      --runtime-set ignore_warnings_on_exit 1
+                      --runtime-set ignore_warnings_on_exit 1 ^
+                      --report=full > phpcs-report.txt
                 """
             }
         }
@@ -48,7 +49,7 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: 'grype-report.json', fingerprint: true
+            archiveArtifacts artifacts: 'grype-report.json, phpcs-report.txt', fingerprint: true
         }
         success {
             echo 'Build Successful!'
