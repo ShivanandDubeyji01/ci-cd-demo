@@ -18,6 +18,7 @@ pipeline {
                 bat "set PATH=%PHP_PATH%;%PATH% && composer install"
             }
         }
+
         stage('Grype Scan') {
             steps {
                 bat """
@@ -26,7 +27,7 @@ pipeline {
                 """
             }
         }
-    }
+
         stage('Run PHPUnit Tests') {
             steps {
                 bat "set PATH=%PHP_PATH%;%PATH% && vendor\\bin\\phpunit tests"
@@ -35,7 +36,11 @@ pipeline {
     }
 
     post {
-        success { echo 'Build Successful!' }
-        failure { echo 'Build Failed!' }
+        success {
+            echo 'Build Successful!'
+        }
+        failure {
+            echo 'Build Failed!'
+        }
     }
 }
