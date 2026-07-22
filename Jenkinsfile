@@ -20,13 +20,13 @@ pipeline {
         }
 
         stage('Grype Scan') {
-            steps {
-                bat """
-                    cd "%WORKSPACE%"
-                    grype dir:. --output json > grype-report.json
-                """
-            }
-        }
+        steps {
+        bat """
+            cd "%WORKSPACE%"
+            grype dir:. --output json --fail-on high > grype-report.json
+        """
+    }
+}
 
         stage('Run PHPUnit Tests') {
             steps {
