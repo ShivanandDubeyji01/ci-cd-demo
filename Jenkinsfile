@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        PHP_PATH = 'C:\\xampp8.2\\php'
+    }
+
     stages {
 
         stage('Checkout') {
@@ -11,25 +15,19 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                bat 'composer install'
+                bat "set PATH=%PHP_PATH%;%PATH% && composer install"
             }
         }
 
         stage('Run PHPUnit Tests') {
             steps {
-                bat 'vendor\\bin\\phpunit tests'
+                bat "set PATH=%PHP_PATH%;%PATH% && vendor\\bin\\phpunit tests"
             }
         }
-
     }
 
     post {
-        success {
-            echo 'Build Successful!'
-        }
-
-        failure {
-            echo 'Build Failed!'
-        }
+        success { echo 'Build Successful!' }
+        failure { echo 'Build Failed!' }
     }
 }
