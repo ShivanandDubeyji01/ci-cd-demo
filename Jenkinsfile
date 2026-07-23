@@ -44,46 +44,19 @@ pipeline {
     }
 
     post {
-        always {
-            script {
-                def jiraIssueKeys = []
+    always {
+        script {
+            def statusText = currentBuild.result ?: 'SUCCESS'
+            def commentText = "Build ${env.BUILD_NUMBER} ${statusText} on Jenkins job ${env.JOB_NAME} " +
+                              "for commit ${env.GIT_COMMIT}. " +
+                              "Branch: ${env.GIT_BRANCH ?: 'main'}."
 
-                // Git log; agar git command fail ho to exit /b 0 se ignore
-                def logOutput = bat(
-                    script: 'git log -n 10 --pretty=format:"%s" || exit /b 0',
-                    returnStdout: true
-                ).trim()
-
-                if (logOutput) {
-                    logOutput.readLines().each { msg ->
-                        def matcher = (msg =~ /[A-Z]+-\\d+/)
-                        matcher.each { key ->
-                            if (!jiraIssueKeys.contains(key)) {
-                                jiraIssueKeys << key
-                            }
-                        }
-                    }
-                }
-
-                if (jiraIssueKeys.isEmpty()) {
-                    echo "No Jira issue keys found in recent commit messages."
-                } else {
-                    echo "Detected Jira issues: ${jiraIssueKeys}"
-
-                    def statusText = currentBuild.result ?: 'SUCCESS'
-
-                    jiraIssueKeys.each { issueKey ->
-                        def commentText = "Build ${env.BUILD_NUMBER} ${statusText} on Jenkins job ${env.JOB_NAME} " +
-                                          "for commit ${env.GIT_COMMIT}. " +
-                                          "Branch: ${env.GIT_BRANCH ?: 'main'}."
-
-                        jiraAddComment(
-                            idOrKey: issueKey,
-                            comment: commentText
-                        )
-                    }
-                }
-            }
+            // SCRUM-6 Jira task ko update karo
+            jiraAddComment(
+                idOrKey: 'SCRUM-6',
+                comment: commentText
+            )
         }
     }
+}
 }
