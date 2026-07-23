@@ -44,19 +44,20 @@ pipeline {
     }
 
     post {
-    always {
-        script {
-            def statusText = currentBuild.result ?: 'SUCCESS'
-            def commentText = "Build ${env.BUILD_NUMBER} ${statusText} on Jenkins job ${env.JOB_NAME} " +
-                              "for commit ${env.GIT_COMMIT}. " +
-                              "Branch: ${env.GIT_BRANCH ?: 'main'}."
+        always {
+            script {
+                def statusText = currentBuild.result ?: 'SUCCESS'
+                def commentText = "Build ${env.BUILD_NUMBER} ${statusText} " +
+                                  "on Jenkins job ${env.JOB_NAME} " +
+                                  "for commit ${env.GIT_COMMIT}. " +
+                                  "Branch: ${env.GIT_BRANCH ?: 'main'}."
 
-            // SCRUM-6 Jira task ko update karo
-            jiraAddComment(
-                idOrKey: 'SCRUM-6',
-                comment: commentText
-            )
+                // SCRUM-6 Jira task ko update karo
+                jiraComment(
+                    issueKey: 'SCRUM-6',
+                    comment: commentText
+                )
+            }
         }
     }
-}
 }
