@@ -10,25 +10,28 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'composer install'
+                // Composer install on Windows
+                bat 'composer install'
             }
         }
 
         stage('Security Scan - Grype') {
             steps {
-                sh 'grype . -o json > grype-report.json || true'
+                // Grype scan; error ignore so pipeline continues
+                bat 'grype . -o json > grype-report.json || exit /b 0'
             }
         }
 
         stage('Code Quality - PHPCS') {
             steps {
-                sh 'phpcs --report=full > phpcs-report.txt || true'
+                // PHPCS report; non‑zero exit ignore
+                bat 'phpcs --report=full > phpcs-report.txt || exit /b 0'
             }
         }
 
         stage('Unit Tests - PHPUnit') {
             steps {
-                sh 'phpunit'
+                bat 'phpunit'
             }
         }
 
@@ -39,13 +42,19 @@ pipeline {
         }
     }
 
+    /*
+     * Jira auto-detect & comment (Windows):
+     *  - Git commit messages se Jira issue keys (e.g. SCRUM-3) nikalta hai
+     *  - Har detected issue pe build status comment add karta hai
+     */
     post {
         always {
             script {
                 def jiraIssueKeys = []
 
-                def logOutput = sh(
-                    script: "git log -n 10 --pretty=format:%s",
+                // Windows: git log via bat
+                def logOutput = bat(
+                    script: 'git log -n 10 --pretty=format:"%s"',
                     returnStdout: true
                 ).trim()
 
@@ -70,11 +79,12 @@ pipeline {
                                           "for commit ${env.GIT_COMMIT}. " +
                                           "Branch: ${env.GIT_BRANCH ?: 'main'}."
 
+                        // Jira plugin pipeline step
                         jiraAddComment(
                             idOrKey: issueKey,
                             comment: commentText
-                            // Agar Jira Steps config me 'site' naam diya hai, to:
-                            // site: 'Jira-Cloud'
+                            // Agar Jira Steps config me koi 'site' name diya hai,
+                            // to yahan: site: 'Your-Site-Name'
                         )
                     }
                 }
