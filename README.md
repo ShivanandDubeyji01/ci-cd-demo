@@ -1,1 +1,1 @@
-This is an auto-build webhook test.
+Testing Jira integration for SCRUM-3
