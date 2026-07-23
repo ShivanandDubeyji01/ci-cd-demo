@@ -1,1 +1,1 @@
-Testing Jira integration for SCRUM-3
+Testing Jira integration for SCRUM-6
