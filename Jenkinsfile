@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    options {
-        ansiColor('xterm')
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -20,14 +16,12 @@ pipeline {
 
         stage('Security Scan - Grype') {
             steps {
-                // Grype scan report as JSON, failure ignore so pipeline aage chale
                 sh 'grype . -o json > grype-report.json || true'
             }
         }
 
         stage('Code Quality - PHPCS') {
             steps {
-                // PHPCS report, non‑zero exit ko ignore (|| true) so that pipeline continues
                 sh 'phpcs --report=full > phpcs-report.txt || true'
             }
         }
@@ -45,24 +39,16 @@ pipeline {
         }
     }
 
-    /*
-     * Jira auto-detect & comment:
-     *  - Git commit messages se Jira issue keys (e.g. SCRUM-3, PROJ-1) nikalta hai
-     *  - Har detected issue pe build status comment add karta hai
-     */
     post {
         always {
             script {
-                // Unique Jira issue keys list
                 def jiraIssueKeys = []
 
-                // Recent commit messages (last 10) read karo
                 def logOutput = sh(
                     script: "git log -n 10 --pretty=format:%s",
                     returnStdout: true
                 ).trim()
 
-                // Har commit message me Jira key regex se match
                 logOutput.readLines().each { msg ->
                     def matcher = (msg =~ /[A-Z]+-\\d+/)
                     matcher.each { key ->
@@ -77,7 +63,6 @@ pipeline {
                 } else {
                     echo "Detected Jira issues: ${jiraIssueKeys}"
 
-                    // Build result (SUCCESS/FAILURE/UNSTABLE, etc.)
                     def statusText = currentBuild.result ?: 'SUCCESS'
 
                     jiraIssueKeys.each { issueKey ->
@@ -85,7 +70,6 @@ pipeline {
                                           "for commit ${env.GIT_COMMIT}. " +
                                           "Branch: ${env.GIT_BRANCH ?: 'main'}."
 
-                        // Jira plugin pipeline step
                         jiraAddComment(
                             idOrKey: issueKey,
                             comment: commentText
