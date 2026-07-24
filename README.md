@@ -1,1 +1,1 @@
-Integrate Jenkins CI build status with Jira tessting going on now
+Integrate Jenkins CI build status with Jira tessting
