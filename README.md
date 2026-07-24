@@ -1,1 +1,1 @@
-Testing Jira integration for SCRUM-88
+Integrate Jenkins CI build status with Jira tessting
